@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎉 Cumpleaños Nelson 🎉</title>
+<style>
+body {
+    margin:0;
+    font-family: Arial, sans-serif;
+    text-align:center;
+    background:black;
+    color:white;
+    overflow:hidden;
+}
+#countdown {
+    font-size: 60px;
+    margin-top: 20%;
+}
+#message {
+    display:none;
+    font-size:40px;
+}
+canvas {
+    position:fixed;
+    top:0;
+    left:0;
+}
+</style>
+</head>
+<body>
+
+<div id="countdown">Cargando...</div>
+<div id="message">🎉 ¡Felices 37 años Nelson! 🥳🥳 🎉</div>
+
+<canvas id="fireworks"></canvas>
+
+<audio id="music" src="" loop></audio>
+<audio id="pop" src=""></audio>
+
+<script>
+// Cuenta regresiva hasta medianoche
+function updateCountdown() {
+    const now = new Date();
+    const end = new Date();
+    end.setHours(24,0,0,0);
+
+    const diff = end - now;
+
+    if(diff <= 0){
+        startParty();
+        return;
+    }
+
+    const h = Math.floor(diff / 1000 / 60 / 60);
+    const m = Math.floor(diff / 1000 / 60) % 60;
+    const s = Math.floor(diff / 1000) % 60;
+
+    document.getElementById("countdown").innerHTML =
+        h + "h " + m + "m " + s + "s";
+}
+
+setInterval(updateCountdown,1000);
+
+// Animación brutal
+function startParty(){
+    document.getElementById("countdown").style.display="none";
+    document.getElementById("message").style.display="block";
+    launchFireworks();
+}
+
+// Fuegos artificiales simples
+const canvas = document.getElementById("fireworks");
+const ctx = canvas.getContext("2d");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let particles = [];
+
+function launchFireworks(){
+    setInterval(()=>{
+        for(let i=0;i<100;i++){
+            particles.push({
+                x: canvas.width/2,
+                y: canvas.height/2,
+                vx: (Math.random()-0.5)*10,
+                vy: (Math.random()-0.5)*10,
+                life:100
+            });
+        }
+    },800);
+    animate();
+}
+
+function animate(){
+    ctx.fillStyle="rgba(0,0,0,0.2)";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    particles.forEach(p=>{
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life--;
+
+        ctx.fillStyle="hsl("+Math.random()*360+",100%,50%)";
+        ctx.fillRect(p.x,p.y,3,3);
+    });
+
+    particles = particles.filter(p=>p.life>0);
+
+    requestAnimationFrame(animate);
+}
+</script>
+
+</body>
+</html>
