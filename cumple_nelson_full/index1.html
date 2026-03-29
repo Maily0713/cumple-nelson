@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎉 Cumpleaños Nelson 🎉</title>
+
+<style>
+body{margin:0;font-family:'Segoe UI',sans-serif;background:radial-gradient(circle,#1a1a2e,#000);color:white;text-align:center}
+#inicio{position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#ff4e50,#f9d423);display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:20}
+#inicio h1{font-size:2.5em;color:white}
+button{padding:12px 20px;border:none;border-radius:12px;background:#ffcc00;color:black;font-weight:bold;cursor:pointer;margin:8px}
+#app{display:none}
+.card{background:rgba(255,255,255,0.1);margin:15px auto;padding:15px;border-radius:20px;width:90%;max-width:500px;backdrop-filter:blur(10px)}
+img{width:160px;border-radius:50%;border:3px solid #ffcc00}
+#overlay{position:fixed;top:0;left:0;width:100%;height:100%;display:flex;justify-content:center;align-items:center;font-size:3em;background:rgba(0,0,0,0.8);color:#ffcc00;z-index:10;opacity:0;transition:.5s;pointer-events:none}
+#mensajeFinal{position:fixed;top:0;left:0;width:100%;height:100%;display:flex;justify-content:center;align-items:center;font-size:2em;background:rgba(0,0,0,0.8);color:#00ffcc;z-index:15;opacity:0;transition:.5s;pointer-events:none}
+#bigFinal{position:fixed;top:0;left:0;width:100%;height:100%;display:flex;justify-content:center;align-items:center;flex-direction:column;font-size:2.5em;background:radial-gradient(circle,#ff4e50,#000);color:white;z-index:30;opacity:0;transition:1s;pointer-events:none;text-align:center}
+#gameArea{position:relative;height:200px;background:#111;overflow:hidden}
+.gift{position:absolute;font-size:30px;cursor:pointer}
+canvas{position:fixed;top:0;left:0;pointer-events:none}
+</style>
+</head>
+
+<body>
+
+<div id="inicio">
+<h1>🎂 Cumpleaños Nelson 🎂</h1>
+<button onclick="entrar()">🎁 Iniciar sorpresa</button>
+</div>
+
+<div id="app">
+
+<div class="card">
+<h3>📸 Nelson</h3>
+<video width="200" autoplay muted loop playsinline style="border-radius:20px; border:3px solid #ffcc00;">
+  <source src="video.mp4" type="video/mp4">
+</video>
+</div>
+
+<div class="card">
+<h3>🎵 Canción</h3>
+<button onclick="reproducirCumple()">Reproducir</button>
+<audio id="audio" loop controls>
+<source src="Nelson.mp3" type="audio/mpeg">
+</audio>
+<audio id="clickSound">
+<source src="https://cdn.pixabay.com/download/audio/2022/03/10/audio_4f3f5d4b87.mp3?filename=click-soft-112193.mp3" type="audio/mpeg">
+</audio>
+</div>
+
+<div class="card">
+<h3>⏳ Cuenta regresiva</h3>
+<p id="contador"></p>
+<p id="mensajeCumple"></p>
+</div>
+
+<div class="card">
+<h3>🎮 Juego (Nivel <span id="nivel">1</span>)</h3>
+<div id="gameArea"></div>
+<p>Puntos: <span id="puntos">0</span></p>
+<button onclick="iniciarJuego()">Jugar</button>
+</div>
+
+</div>
+
+<div id="overlay">🎉 NELSON 🎉</div>
+<div id="mensajeFinal"></div>
+<div id="bigFinal">🎉 Felices 37 años Nelson 🎉<br>Que cumplas muchos años más 🥳🥳</div>
+<canvas id="confetti"></canvas>
+
+<script>
+function entrar(){
+ document.getElementById("inicio").style.display="none";
+ document.getElementById("app").style.display="block";
+
+ const audio=document.getElementById("audio");
+ audio.currentTime=0;
+ audio.play().catch(()=>{});
+
+ lanzarConfetti();
+ lanzarFuegos();
+
+ const o=document.getElementById("overlay");
+ o.style.opacity=1;
+ setTimeout(()=>o.style.opacity=0,3000);
+}
+
+function reproducirCumple(){
+ document.getElementById("audio").play().catch(()=>{});
+}
+
+let finalizado=false;
+setInterval(()=>{
+ const now=new Date();
+ const end=new Date();
+ end.setHours(24,0,0,0);
+ const diff=end-now;
+
+ if(diff<=0 && !finalizado){
+  document.getElementById("contador").innerText="00h 00m 00s";
+  document.getElementById("mensajeCumple").innerText="";
+  finalizado=true;
+
+  lanzarConfetti();
+  lanzarFuegos();
+
+  const final=document.getElementById("bigFinal");
+  final.style.opacity=1;
+
+  const audio=document.getElementById("audio");
+  audio.volume=1;
+  audio.currentTime=0;
+  audio.play().catch(()=>{});
+  return;
+ }
+
+ const h=Math.floor(diff/1000/60/60);
+ const m=Math.floor(diff/1000/60%60);
+ const s=Math.floor(diff/1000%60);
+ document.getElementById("contador").innerText=`${h}h ${m}m ${s}s`;
+},1000);
+
+const canvas=document.getElementById("confetti");
+const ctx=canvas.getContext("2d");
+function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight}
+resize();
+window.addEventListener('resize',resize);
+
+let pieces=[];
+
+function lanzarConfetti(){
+ pieces=[];
+ for(let i=0;i<150;i++){
+  pieces.push({x:Math.random()*canvas.width,y:Math.random()*-canvas.height,size:5,speed:3});
+ }
+ animate();
+}
+
+function animate(){
+ ctx.clearRect(0,0,canvas.width,canvas.height);
+ pieces.forEach(p=>{
+  p.y+=p.speed;
+  ctx.fillStyle=`hsl(${Math.random()*360},100%,50%)`;
+  ctx.fillRect(p.x,p.y,p.size,p.size);
+ });
+ requestAnimationFrame(animate);
+}
+
+function lanzarFuegos(){
+ for(let i=0;i<10;i++){
+  setTimeout(()=>{
+   let x=Math.random()*canvas.width;
+   let y=Math.random()*canvas.height/2;
+   for(let j=0;j<30;j++){
+    pieces.push({x:x,y:y,size:4,speed:Math.random()*4+1});
+   }
+  },i*300);
+ }
+}
+
+let puntos=0;
+let recogidos=0;
+let nivelActual=1;
+
+const frases=[
+ "🔥 Eres una leyenda hermano",
+ "🎉 El mejor del mundo Nelson",
+ "💪 Siempre fuerte y grande"
+];
+
+function iniciarJuego(){
+ nivelActual=1;
+ iniciarNivel();
+}
+
+function iniciarNivel(){
+ const area=document.getElementById("gameArea");
+ area.innerHTML="";
+ puntos=0;
+ recogidos=0;
+ document.getElementById("puntos").innerText=puntos;
+ document.getElementById("nivel").innerText=nivelActual;
+
+ let velocidad=700-(nivelActual*150);
+
+ let game=setInterval(()=>{
+  const gift=document.createElement("div");
+  gift.className="gift";
+  gift.innerText="🎁";
+  gift.style.left=Math.random()*90+"%";
+  gift.style.top="0px";
+
+  gift.onclick=()=>{
+   puntos++;
+   recogidos++;
+   document.getElementById("puntos").innerText=puntos;
+   gift.remove();
+
+   const s=document.getElementById("clickSound");
+   s.volume=0.2;
+   s.currentTime=0;
+   s.play().catch(()=>{});
+
+   if(recogidos>=15){
+    clearInterval(game);
+    mostrarMensaje(frases[nivelActual-1]);
+
+    if(nivelActual<3){
+     nivelActual++;
+     setTimeout(iniciarNivel,2000);
+    }else{
+     lanzarFuegos();
+    }
+   }
+  };
+
+  area.appendChild(gift);
+
+  let fall=setInterval(()=>{
+   gift.style.top=gift.offsetTop+5+"px";
+   if(gift.offsetTop>200){gift.remove();clearInterval(fall)}
+  },50);
+
+ },velocidad);
+}
+
+function mostrarMensaje(texto){
+ const m=document.getElementById("mensajeFinal");
+ m.innerText=texto;
+ m.style.opacity=1;
+ lanzarConfetti();
+ setTimeout(()=>m.style.opacity=0,2000);
+}
+</script>
+
+</body>
+</html>
